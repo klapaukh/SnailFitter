@@ -62,9 +62,9 @@ public class Sin extends Function implements DifferentiableNode {
 	public Times differentiate(GPConfig conf) {
 		Times times = new Times();
 		Cos cos = new Cos();
-		Node c = getArgN(0);
+		Node c = getArgN(0).copy(conf);
 		Node gprime = ((DifferentiableNode)c).differentiate(conf);
-		cos.setArgN(0, c.copy(conf));
+		cos.setArgN(0, c);
 
 		times.setArgN(0, cos);
 		times.setArgN(1, gprime);

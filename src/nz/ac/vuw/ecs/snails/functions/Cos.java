@@ -62,9 +62,9 @@ public class Cos extends Function implements DifferentiableNode {
 	public Times differentiate(GPConfig conf) {
 		Times times = new Times();
 		Sin sin = new Sin();
-		Node c = getArgN(0);
+		Node c = getArgN(0).copy(conf);
 		Node gprime = ((DifferentiableNode)c).differentiate(conf);
-		sin.setArgN(0, c.copy(conf));
+		sin.setArgN(0, c);
 
 		Minus minus = new Minus();
 		RandomDouble mone = new RandomDouble(-1);
