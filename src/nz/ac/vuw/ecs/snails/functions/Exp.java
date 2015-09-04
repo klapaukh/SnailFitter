@@ -58,9 +58,17 @@ public class Exp extends Function implements DifferentiableNode {
 	}
 
 	@Override
-	public <F extends Node> F differentiate(GPConfig conf) {
-		// TODO Auto-generated method stub
-		return null;
+	public Times differentiate(GPConfig conf) {
+		Times times = new Times();
+		Exp exp = new Exp();
+		Node c = getArgN(0).copy(conf);
+		Node gprime = ((DifferentiableNode)c).differentiate(conf);
+		exp.setArgN(0, c);
+
+		times.setArgN(0, exp);
+		times.setArgN(1, gprime);
+
+		return times;
 	}
 
 }
