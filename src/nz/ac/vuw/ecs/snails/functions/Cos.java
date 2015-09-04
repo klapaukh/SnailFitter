@@ -59,9 +59,23 @@ public class Cos extends Function implements DifferentiableNode {
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Times differentiate(GPConfig conf) {
+		Times times = new Times();
+		Sin sin = new Sin();
+		Node c = getArgN(0);
+		Node gprime = ((DifferentiableNode)c).differentiate(conf);
+		sin.setArgN(0, c.copy(conf));
+
+		Minus minus = new Minus();
+		RandomDouble mone = new RandomDouble(-1);
+
+		minus.setArgN(0, mone);
+		minus.setArgN(1, sin);
+
+		times.setArgN(0, minus);
+		times.setArgN(1, gprime);
+
+		return times;
 	}
 
 }

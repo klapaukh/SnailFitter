@@ -58,7 +58,7 @@ public class Exp extends Function implements DifferentiableNode {
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
+	public <F extends Node> F differentiate(GPConfig conf) {
 		// TODO Auto-generated method stub
 		return null;
 	}

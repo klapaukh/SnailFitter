@@ -78,9 +78,9 @@ public class SnailFitness extends Fitness {
 		DifferentiableNode n2 = (DifferentiableNode) p.getRoot(0);
 
 		//The derivatives let us estimate the speed of line length
-		Node dn0 = n0.differentiate();
-		Node dn1 = n1.differentiate();
-		Node dn2 = n2.differentiate();
+		Node dn0 = n0.differentiate(config);
+		Node dn1 = n1.differentiate(config);
+		Node dn2 = n2.differentiate(config);
 
 		// total error starts at zero
 		double error = 0;

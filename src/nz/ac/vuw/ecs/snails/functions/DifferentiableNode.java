@@ -1,5 +1,6 @@
 package nz.ac.vuw.ecs.snails.functions;
 
+import nz.ac.vuw.ecs.fgpj.core.GPConfig;
 import nz.ac.vuw.ecs.fgpj.core.Node;
 
 /**
@@ -16,6 +17,6 @@ public interface DifferentiableNode {
 	 *
 	 * @return A subtree representing the derivative
 	 */
-	public <F extends Node> F differentiate();
+	public <F extends Node> F differentiate(GPConfig conf);
 
 }

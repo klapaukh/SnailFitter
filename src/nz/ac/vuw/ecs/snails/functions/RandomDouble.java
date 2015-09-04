@@ -136,7 +136,7 @@ public class RandomDouble extends Terminal implements DifferentiableNode{
 	}
 
 	@Override
-	public RandomDouble differentiate() {
+	public RandomDouble differentiate(GPConfig conf) {
 		return new RandomDouble(0);
 	}
 

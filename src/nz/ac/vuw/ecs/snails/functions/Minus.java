@@ -63,9 +63,14 @@ public class Minus extends Function implements DifferentiableNode {
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Minus differentiate(GPConfig conf) {
+		Minus n = new Minus();
+		for(int i=0;i<this.numArgs;i++){
+			DifferentiableNode c = (DifferentiableNode) getArgN(i);
+			Node dc = c.differentiate(conf);
+			n.setArgN(i, dc);
+		}
+		return n;
 	}
 
 }

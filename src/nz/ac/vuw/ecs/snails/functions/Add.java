@@ -62,9 +62,14 @@ public class Add extends Function implements DifferentiableNode {
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Add differentiate(GPConfig conf) {
+		Add n = new Add();
+		for(int i=0;i<this.numArgs;i++){
+			DifferentiableNode c = (DifferentiableNode) getArgN(i);
+			Node dc = c.differentiate(conf);
+			n.setArgN(i, dc);
+		}
+		return n;
 	}
 
 }

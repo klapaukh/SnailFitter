@@ -56,7 +56,7 @@ public class T extends Terminal implements DifferentiableNode {
 		d.setValue(d.getT());
 	}
 
-	public RandomDouble differentiate(){
+	public RandomDouble differentiate(GPConfig conf){
 		return new RandomDouble(1);
 	}
 

@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+import com.sun.org.apache.xml.internal.utils.UnImplNode;
+
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
 import nz.ac.vuw.ecs.fgpj.core.Node;
@@ -62,9 +64,9 @@ public class Tan extends Function implements DifferentiableNode{
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
+	public <F extends Node> F differentiate(GPConfig conf) {
 		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("Not implemented - requires SEC");
 	}
 
 }

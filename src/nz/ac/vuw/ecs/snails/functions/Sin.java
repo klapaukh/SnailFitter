@@ -59,9 +59,17 @@ public class Sin extends Function implements DifferentiableNode {
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Times differentiate(GPConfig conf) {
+		Times times = new Times();
+		Cos cos = new Cos();
+		Node c = getArgN(0);
+		Node gprime = ((DifferentiableNode)c).differentiate(conf);
+		cos.setArgN(0, c.copy(conf));
+
+		times.setArgN(0, cos);
+		times.setArgN(1, gprime);
+
+		return times;
 	}
 
 }

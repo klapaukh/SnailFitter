@@ -65,9 +65,28 @@ public class Times extends Function implements DifferentiableNode{
 	}
 
 	@Override
-	public <F extends Node> F differentiate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Add differentiate(GPConfig conf) {
+		Add add = new Add();
+
+		Node f = getArgN(0).copy(conf);
+		Node g = getArgN(0).copy(conf);
+
+		Node fprime = ((DifferentiableNode)f).differentiate(conf);
+		Node gprime = ((DifferentiableNode)f).differentiate(conf);
+
+		Times right = new Times();
+		Times left = new Times();
+
+		left.setArgN(0,f);
+		left.setArgN(0,gprime);
+
+		right.setArgN(0,fprime);
+		right.setArgN(0,g);
+
+		add.setArgN(0, left);
+		add.setArgN(1, right);
+
+		return add;
 	}
 
 }
