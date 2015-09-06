@@ -73,7 +73,8 @@ public class SnailFitness extends Fitness {
 	@Override
 	public void assignFitness(GeneticProgram p, GPConfig config) {
 		// Create space for the return values and variables
-		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(),new ReturnDouble(),new ReturnDouble() };
+		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(),
+				new ReturnDouble(), new ReturnDouble() };
 
 		// The derivatives let us estimate the speed of line length
 		GeneticProgram dp = new GeneticProgram(3);
@@ -83,7 +84,7 @@ public class SnailFitness extends Fitness {
 					i);
 		}
 
-//		System.out.println(dp.toString());
+		// System.out.println(dp.toString());
 		// The zeroth point is always the same. In fact it provides the
 		// translation required.
 		// The translation is then constantly applied to all points to ensure
@@ -93,13 +94,13 @@ public class SnailFitness extends Fitness {
 		Point3D translation = values.get(0);
 		Point3D model0 = toPoint3D(d);
 		translation = translation.subtract(model0);
-		
-//		System.out.println(translation.toString());
+
+		// System.out.println(translation.toString());
 
 		double distanceTravelled = values.get(1).distance(values.get(0));
 		Point3D targetVector = values.get(1);
 
-		double firstT = getTOffset(dp, d, 0, distanceTravelled);
+		double firstT = getTOffset(p, dp, d, 0, distanceTravelled);
 
 		setT(d, firstT);
 		p.evaluate(d);
@@ -108,17 +109,17 @@ public class SnailFitness extends Fitness {
 		Point3D model1 = toPoint3D(d).subtract(translation);
 
 		Rotate r = getRotationBetween(model1, targetVector);
-//		System.out.println(r.toString());
-		
+		// System.out.println(r.toString());
 
 		// Test each program on every point in the hash map and sum the squared
 		// error
 		double t = 0;
 		// total error starts at zero
 		double error = 0;
-		for (int i = 1; i< values.size(); i++) {
-			t = getTOffset(dp,d, t, values.get(i).subtract(values.get(i-1)).magnitude());
-//			System.out.println(t);
+		for (int i = 1; i < values.size(); i++) {
+			t = getTOffset(p, dp, d, t,
+					values.get(i).subtract(values.get(i - 1)).magnitude());
+			 System.out.println(t);
 			setT(d, t);
 			p.evaluate(d);
 			Point3D genPoint = toPoint3D(d).subtract(translation);
@@ -130,12 +131,11 @@ public class SnailFitness extends Fitness {
 		p.setFitness(Math.sqrt(error));
 
 	}
-	
+
 	public Rotate getRotationBetween(Point3D source, Point3D target) {
 		// The rotation is the one which will align targetVector with model1
 		target.angle(source);
-		Rotate r = new Rotate(source.angle(target),
-				source.crossProduct(target));
+		Rotate r = new Rotate(source.angle(target), source.crossProduct(target));
 		return r;
 	}
 
@@ -143,8 +143,44 @@ public class SnailFitness extends Fitness {
 		return new Point3D(d[0].value(), d[1].value(), d[2].value());
 	}
 
-	public double getTOffset(GeneticProgram dt, ReturnDouble[] d, double oldT,
+	public double getTOffset(GeneticProgram p, GeneticProgram dt,
+			ReturnDouble[] d, double oldT, double targetDistance) {
+		return getTOffsetNR(p, dt, d, oldT, targetDistance);
+	}
+
+	public double getTOffsetNR(GeneticProgram p, GeneticProgram dt, ReturnDouble[] d, double oldT,
 			double targetDistance) {
+		//Source value
+		setT(d,oldT);
+		p.evaluate(d);
+		Point3D source = toPoint3D(d);
+		
+		double x0 = getTOffsetLinear(dt,d,oldT,targetDistance);
+		setT(d,x0);
+		p.evaluate(d);
+		
+		double f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
+		
+		while(Math.abs(f0) > targetDistance * 0.001){
+			dt.evaluate(d);
+			double fprime0 = toPoint3D(d).subtract(source).magnitude();
+			
+			x0 = x0 - f0/fprime0;
+			
+			setT(d,x0);
+			p.evaluate(d);
+			f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;	
+		}
+		
+		System.out.printf("%f, %f, ", targetDistance, f0);
+		if(oldT > x0){
+			throw new RuntimeException("Newton-Raphson went backwards :'(");
+		}
+		return x0;
+	}
+
+	public double getTOffsetLinear(GeneticProgram dt, ReturnDouble[] d,
+			double oldT, double targetDistance) {
 		setT(d, oldT);
 		dt.evaluate(d);
 		double speed = toPoint3D(d).magnitude();
