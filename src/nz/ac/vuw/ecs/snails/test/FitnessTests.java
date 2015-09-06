@@ -50,11 +50,11 @@ public class FitnessTests {
 		SnailFitness sf = new SnailFitness();
 		sf.initFitness();
 		sf.assignFitness(p1, conf);
-//		sf.assignFitness(p2, conf);
+		sf.assignFitness(p2, conf);
 		
-		System.out.println(p1.getFitness());
+//		System.out.println(p1.getFitness());
 //		System.out.println(p2.getFitness());
 		
-//		assertTrue(p1.getFitness() < p2.getFitness());
+		assertTrue(p1.getFitness() < p2.getFitness());
 	}
 }
