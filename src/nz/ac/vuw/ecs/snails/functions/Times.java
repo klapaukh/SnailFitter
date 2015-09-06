@@ -78,10 +78,10 @@ public class Times extends Function implements DifferentiableNode{
 		Times left = new Times();
 
 		left.setArgN(0,f);
-		left.setArgN(0,gprime);
+		left.setArgN(1,gprime);
 
 		right.setArgN(0,fprime);
-		right.setArgN(0,g);
+		right.setArgN(1,g);
 
 		add.setArgN(0, left);
 		add.setArgN(1, right);
