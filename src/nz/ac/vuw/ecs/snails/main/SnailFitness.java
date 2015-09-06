@@ -155,26 +155,37 @@ public class SnailFitness extends Fitness {
 		p.evaluate(d);
 		Point3D source = toPoint3D(d);
 		
-		double x0 = getTOffsetLinear(dt,d,oldT,targetDistance);
+		double initialx0 = getTOffsetLinear(dt,d,oldT,targetDistance);
+		double x0 = initialx0;
 		setT(d,x0);
 		p.evaluate(d);
 		
 		double f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
 		
+		int count = 0;
 		while(Math.abs(f0) > targetDistance * 0.001){
 			dt.evaluate(d);
 			double fprime0 = toPoint3D(d).magnitude();
+			
+			if(!Double.isFinite(fprime0)){
+				return initialx0;
+			}
 			
 			x0 = x0 - f0/fprime0;
 			
 			setT(d,x0);
 			p.evaluate(d);
-			f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;	
+			f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
+			
+			count++;
+			if(count > 10){
+				return initialx0;
+			}
 		}
 		
 //		System.out.printf("%f, %f, ", targetDistance, f0);
 		if(oldT > x0){
-			throw new RuntimeException("Newton-Raphson went backwards :'(");
+			return initialx0;
 		}
 		return x0;
 	}
