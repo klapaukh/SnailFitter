@@ -83,10 +83,10 @@ public class SnailMain {
 		// conf.addFunction(new ln());
 
 		// Fitness functions
-		conf.fitnessObject = new ParallelFitness<SnailFitness>(new SnailFitness(), 16, 125);
+		conf.fitnessObject = new ParallelFitness<SnailFitness>(new SnailFitness(), 16, 10);
 
 		// Create a population
-		Population p = new Population(1000, conf);
+		Population p = new Population(160, conf);
 
 		// Everything just returns a double
 		p.setReturnType(ReturnDouble.TYPENUM);
@@ -101,12 +101,10 @@ public class SnailMain {
 		long start = System.currentTimeMillis();
 
 		// Run the GP algorithm for 500 generations
-		int numGenerations = p.evolve(1000); // return how many generations
+		int gens = 100;
+		int numGenerations = p.evolve(gens); // return how many generations
 												// actually happened
-		if (numGenerations < 1000) {
-			// If numGenerations < 500, then it terminated before the 500
-			// generations finished
-			// because it found a solution
+		if (numGenerations < gens) {
 			System.out.println("Terminated early");
 		}
 		// end timing
@@ -123,7 +121,6 @@ public class SnailMain {
 		System.out.println("Best program:");
 		System.out.println(s);
 
-		System.out.println("Run time (excluding setup and tear down): " + (end - start) + "ms");
 
 	}
 
