@@ -26,6 +26,7 @@ import nz.ac.vuw.ecs.fgpj.core.Population;
 import nz.ac.vuw.ecs.fgpj.core.TournamentSelection;
 import nz.ac.vuw.ecs.snails.functions.Add;
 import nz.ac.vuw.ecs.snails.functions.Cos;
+import nz.ac.vuw.ecs.snails.functions.Divide;
 import nz.ac.vuw.ecs.snails.functions.Exp;
 import nz.ac.vuw.ecs.snails.functions.Minus;
 import nz.ac.vuw.ecs.snails.functions.RandomDouble;
@@ -54,7 +55,7 @@ public class SnailMain {
 	public static void main(String[] args) {
 
 		// 3 trees - one for each dimension
-		GPConfig conf = new GPConfig(3, 1, 6, 0.28, 0.70, 0.02);
+		GPConfig conf = new GPConfig(3, 1, 6, 0.70, 0.28, 0.02);
 
 		// Each generation basic statistics about that generation will be logged
 		// to this file.
@@ -74,16 +75,17 @@ public class SnailMain {
 		conf.addFunction(new Add());
 		conf.addFunction(new Times());
 		conf.addFunction(new Minus());
-		// conf.addFunction(new Divide());
+		 conf.addFunction(new Divide());
 		conf.addFunction(new Exp());
 		conf.addFunction(new Sin());
 		conf.addFunction(new Cos());
 		// conf.addFunction(new Tan());
 		// conf.addFunction(new Sec());
-		// conf.addFunction(new ln());
+//		 conf.addFunction(new Ln());
 
 		// Fitness functions
-		conf.fitnessObject = new ParallelFitness<SnailFitness>(new SnailFitness(), 16, 10);
+		 SnailFitness sfit = new SnailFitness("raup.csv");
+		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 10);
 
 		// Create a population
 		Population p = new Population(160, conf);
@@ -121,6 +123,8 @@ public class SnailMain {
 		System.out.println("Best program:");
 		System.out.println(s);
 
+		
+		sfit.draw(s, "snail.csv", conf);
 
 	}
 
