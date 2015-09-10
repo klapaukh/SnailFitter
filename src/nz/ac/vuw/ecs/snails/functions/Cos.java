@@ -66,8 +66,8 @@ public class Cos extends Function implements DifferentiableNode {
 		Node gprime = ((DifferentiableNode)c).differentiate(conf);
 		sin.setArgN(0, c);
 
-		Minus minus = new Minus();
-		RandomDouble mone = new RandomDouble(1);
+		Times minus = new Times();
+		RandomDouble mone = new RandomDouble(-1);
 
 		minus.setArgN(0, mone);
 		minus.setArgN(1, sin);
