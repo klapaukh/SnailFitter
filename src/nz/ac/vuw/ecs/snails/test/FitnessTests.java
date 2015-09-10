@@ -16,7 +16,7 @@ public class FitnessTests {
 
 	@Test
 	public void testRotation() {
-		SnailFitness sf = new SnailFitness();
+		SnailFitness sf = new SnailFitness(null);
 
 		for (int i = 0; i < 100; i++) {
 			Point3D r1 = new Point3D(Math.random() * 5, Math.random() * 2,
@@ -47,7 +47,7 @@ public class FitnessTests {
 		p1.parseProgram(programString, conf);
 		p2.parseProgram(programString2, conf);
 		
-		SnailFitness sf = new SnailFitness();
+		SnailFitness sf = new SnailFitness(null);
 		sf.initFitness();
 		sf.assignFitness(p1, conf);
 		sf.assignFitness(p2, conf);
