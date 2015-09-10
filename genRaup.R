@@ -25,8 +25,11 @@ points = data.frame(theta = seq(0,4*pi,0.01)) %>%
          b = r*cos(theta),
          c = y)
 
-with(points, plot3d(a,b,c))
-
 points %>%
   select(a,b,c) %>%
-  write.csv(file="raup.csv",row.names = F, col.names=F)
+  write.csv(file="raup.csv",row.names = F, col.names = F, sep=" ")
+
+fitted = read.csv("snail.csv")
+with(points, plot3d(a,b,c,col="red"))
+with(fitted, plot3d(x,y,z,col = "blue",add = T))
+
