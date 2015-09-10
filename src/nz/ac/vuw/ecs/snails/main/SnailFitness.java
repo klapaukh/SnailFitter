@@ -19,8 +19,12 @@ package nz.ac.vuw.ecs.snails.main;
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import javafx.geometry.Point3D;
 import javafx.scene.transform.Rotate;
@@ -42,7 +46,12 @@ import nz.ac.vuw.ecs.snails.functions.ReturnDouble;
 public class SnailFitness extends Fitness {
 	// The values are all the points of the Snail model
 	private List<Point3D> values;
-
+	private final String filename; 
+	
+	public SnailFitness(String filename){
+		this.filename = filename;
+	}
+	
 	@Override
 	public int compare(double arg0, double arg1) {
 		// Must multiply by -1 as smaller is better rather than larger is better
@@ -50,15 +59,32 @@ public class SnailFitness extends Fitness {
 		return -1 * Double.compare(arg0, arg1);
 	}
 
+	public void loadFile(String filename){
+		try {
+			values = new ArrayList<>();
+			Scanner scan = new Scanner(new File(filename));
+			while(scan.hasNext()){
+				values.add(new Point3D(scan.nextDouble(),scan.nextDouble(),scan.nextDouble()));
+			}
+			scan.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			initFitness();
+		}
+	}
+	
 	@Override
 	/**
 	 * This populates the values hash map will all of the test cases that will be used for training
 	 */
 	public void initFitness() {
-		// Create the hashmap
+		if(filename != null){
+			loadFile(filename);
+			return;
+		}
 		values = new ArrayList<Point3D>();
 
-		// TODO: This should actually read in a file
 		for (double t = 0; t < 100; t += 0.1) {
 			values.add(new Point3D(Math.cos(t), Math.sin(t), t));
 		}
@@ -221,5 +247,73 @@ public class SnailFitness extends Fitness {
 	public void finish() {
 		// There is no required clean up for this fitness function.
 	}
+	
+	public void draw(GeneticProgram p, String filename, GPConfig config){
+		// Create space for the return values and variables
+		
+		PrintStream out = null;
+		try {
+			out = new PrintStream(new File(filename));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		out.println("x,y,z");
+		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(),
+				new ReturnDouble(), new ReturnDouble() };
 
+		// The derivatives let us estimate the speed of line length
+		GeneticProgram dp = new GeneticProgram(3);
+		for (int i = 0; i < 3; i++) {
+			dp.setRoot(
+					((DifferentiableNode) p.getRoot(i)).differentiate(config),
+					i);
+		}
+
+		// System.out.println(dp.toString());
+		// The zeroth point is always the same. In fact it provides the
+		// translation required.
+		// The translation is then constantly applied to all points to ensure
+		// that the origins line up. This means it has zero error
+		setT(d, 0);
+		p.evaluate(d);
+		Point3D translation = values.get(0);
+		Point3D model0 = toPoint3D(d);
+		translation = translation.subtract(model0);
+
+		// System.out.println(translation.toString());
+
+		double distanceTravelled = values.get(1).distance(values.get(0));
+		Point3D targetVector = values.get(1);
+
+		double firstT = getTOffset(p, dp, d, 0, distanceTravelled);
+
+		setT(d, firstT);
+		p.evaluate(d);
+
+		// Remember to translate to the transformed origin
+		Point3D model1 = toPoint3D(d).subtract(translation);
+
+		Rotate r = getRotationBetween(model1, targetVector);
+		// System.out.println(r.toString());
+
+		// Test each program on every point in the hash map and sum the squared
+		// error
+		double t = 0;
+		// total error starts at zero
+		double error = 0;
+		for (int i = 1; i < values.size(); i++) {
+			t = getTOffset(p, dp, d, t,
+					values.get(i).subtract(values.get(i - 1)).magnitude());
+//			 System.out.println(t);
+			setT(d, t);
+			p.evaluate(d);
+			Point3D genPoint = toPoint3D(d).subtract(translation);
+			genPoint = r.transform(genPoint);
+			out.printf("%f,%f,%f\n" , genPoint.getX(),genPoint.getY(), genPoint.getZ());
+		}		
+		out.close();
+	}
+
+	
 }
