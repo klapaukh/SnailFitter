@@ -2,6 +2,9 @@
 bin/
 *.gen
 run-log.txt
+raup.csv
+snail.csv
+
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
