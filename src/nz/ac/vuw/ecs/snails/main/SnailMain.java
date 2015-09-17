@@ -85,10 +85,10 @@ public class SnailMain {
 
 		// Fitness functions
 		 SnailFitness sfit = new SnailFitness("raup.csv");
-		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 10);
+		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 1);
 
 		// Create a population
-		Population p = new Population(160, conf);
+		Population p = new Population(16, conf);
 
 		// Everything just returns a double
 		p.setReturnType(ReturnDouble.TYPENUM);
@@ -102,8 +102,7 @@ public class SnailMain {
 		// Begin timing
 		long start = System.currentTimeMillis();
 
-		// Run the GP algorithm for 500 generations
-		int gens = 100;
+		int gens = 5;
 		int numGenerations = p.evolve(gens); // return how many generations
 												// actually happened
 		if (numGenerations < gens) {
@@ -125,6 +124,7 @@ public class SnailMain {
 
 		
 		sfit.draw(s, "snail.csv", conf);
+		sfit.scatterplot(s, conf);
 
 	}
 

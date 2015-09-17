@@ -19,6 +19,8 @@ package nz.ac.vuw.ecs.snails.main;
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import java.awt.Canvas;
+import java.awt.Panel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -28,11 +30,23 @@ import java.util.Scanner;
 
 import javafx.geometry.Point3D;
 import javafx.scene.transform.Rotate;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import nz.ac.vuw.ecs.fgpj.core.Fitness;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
 import nz.ac.vuw.ecs.fgpj.core.GeneticProgram;
 import nz.ac.vuw.ecs.snails.functions.DifferentiableNode;
 import nz.ac.vuw.ecs.snails.functions.ReturnDouble;
+
+import org.jzy3d.chart.Chart;
+import org.jzy3d.chart.factories.SwingChartComponentFactory;
+import org.jzy3d.colors.Color;
+import org.jzy3d.maths.Coord3d;
+import org.jzy3d.plot3d.primitives.Scatter;
+import org.jzy3d.plot3d.rendering.canvas.ICanvas;
+import org.jzy3d.plot3d.rendering.canvas.Quality;
 
 /**
  * SymbolicFitness attempts to be a general fitness function using Root Mean
@@ -46,12 +60,12 @@ import nz.ac.vuw.ecs.snails.functions.ReturnDouble;
 public class SnailFitness extends Fitness {
 	// The values are all the points of the Snail model
 	private List<Point3D> values;
-	private final String filename; 
-	
-	public SnailFitness(String filename){
+	private final String filename;
+
+	public SnailFitness(String filename) {
 		this.filename = filename;
 	}
-	
+
 	@Override
 	public int compare(double arg0, double arg1) {
 		// Must multiply by -1 as smaller is better rather than larger is better
@@ -59,12 +73,13 @@ public class SnailFitness extends Fitness {
 		return -1 * Double.compare(arg0, arg1);
 	}
 
-	public void loadFile(String filename){
+	public void loadFile(String filename) {
 		try {
 			values = new ArrayList<>();
 			Scanner scan = new Scanner(new File(filename));
-			while(scan.hasNext()){
-				values.add(new Point3D(scan.nextDouble(),scan.nextDouble(),scan.nextDouble()));
+			while (scan.hasNext()) {
+				values.add(new Point3D(scan.nextDouble(), scan.nextDouble(),
+						scan.nextDouble()));
 			}
 			scan.close();
 		} catch (FileNotFoundException e) {
@@ -73,13 +88,13 @@ public class SnailFitness extends Fitness {
 			initFitness();
 		}
 	}
-	
+
 	@Override
 	/**
 	 * This populates the values hash map will all of the test cases that will be used for training
 	 */
 	public void initFitness() {
-		if(filename != null){
+		if (filename != null) {
 			loadFile(filename);
 			return;
 		}
@@ -145,7 +160,7 @@ public class SnailFitness extends Fitness {
 		for (int i = 1; i < values.size(); i++) {
 			t = getTOffset(p, dp, d, t,
 					values.get(i).subtract(values.get(i - 1)).magnitude());
-//			 System.out.println(t);
+			// System.out.println(t);
 			setT(d, t);
 			p.evaluate(d);
 			Point3D genPoint = toPoint3D(d).subtract(translation);
@@ -174,43 +189,43 @@ public class SnailFitness extends Fitness {
 		return getTOffsetNR(p, dt, d, oldT, targetDistance);
 	}
 
-	public double getTOffsetNR(GeneticProgram p, GeneticProgram dt, ReturnDouble[] d, double oldT,
-			double targetDistance) {
-		//Source value
-		setT(d,oldT);
+	public double getTOffsetNR(GeneticProgram p, GeneticProgram dt,
+			ReturnDouble[] d, double oldT, double targetDistance) {
+		// Source value
+		setT(d, oldT);
 		p.evaluate(d);
 		Point3D source = toPoint3D(d);
-		
-		double initialx0 = getTOffsetLinear(dt,d,oldT,targetDistance);
+
+		double initialx0 = getTOffsetLinear(dt, d, oldT, targetDistance);
 		double x0 = initialx0;
-		setT(d,x0);
+		setT(d, x0);
 		p.evaluate(d);
-		
+
 		double f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
-		
+
 		int count = 0;
-		while(Math.abs(f0) > targetDistance * 0.001){
+		while (Math.abs(f0) > targetDistance * 0.001) {
 			dt.evaluate(d);
 			double fprime0 = toPoint3D(d).magnitude();
-			
-			if(!Double.isFinite(fprime0)){
+
+			if (!Double.isFinite(fprime0)) {
 				return initialx0;
 			}
-			
-			x0 = x0 - f0/fprime0;
-			
-			setT(d,x0);
+
+			x0 = x0 - f0 / fprime0;
+
+			setT(d, x0);
 			p.evaluate(d);
 			f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
-			
+
 			count++;
-			if(count > 10){
+			if (count > 10) {
 				return initialx0;
 			}
 		}
-		
-//		System.out.printf("%f, %f, ", targetDistance, f0);
-		if(oldT > x0){
+
+		// System.out.printf("%f, %f, ", targetDistance, f0);
+		if (oldT > x0) {
 			return initialx0;
 		}
 		return x0;
@@ -247,18 +262,12 @@ public class SnailFitness extends Fitness {
 	public void finish() {
 		// There is no required clean up for this fitness function.
 	}
-	
-	public void draw(GeneticProgram p, String filename, GPConfig config){
+
+	public List<Point3D> genPoints(GeneticProgram p, GPConfig config) {
 		// Create space for the return values and variables
-		
-		PrintStream out = null;
-		try {
-			out = new PrintStream(new File(filename));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		out.println("x,y,z");
+
+		List<Point3D> list = new ArrayList<>();
+
 		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(),
 				new ReturnDouble(), new ReturnDouble() };
 
@@ -305,15 +314,65 @@ public class SnailFitness extends Fitness {
 		for (int i = 1; i < values.size(); i++) {
 			t = getTOffset(p, dp, d, t,
 					values.get(i).subtract(values.get(i - 1)).magnitude());
-//			 System.out.println(t);
+			// System.out.println(t);
 			setT(d, t);
 			p.evaluate(d);
 			Point3D genPoint = toPoint3D(d).subtract(translation);
 			genPoint = r.transform(genPoint);
-			out.printf("%f,%f,%f\n" , genPoint.getX(),genPoint.getY(), genPoint.getZ());
-		}		
-		out.close();
+			list.add(genPoint);
+		}
+
+		return list;
+
 	}
 
+	public void draw(GeneticProgram p, String filename, GPConfig config) {
+		try {
+			PrintStream out = null;
+			out = new PrintStream(new File(filename));
+			out.println("x,y,z");
+			List<Point3D> points = genPoints(p, config);
+			for (Point3D genPoint : points) {
+				out.printf("%f,%f,%f\n", genPoint.getX(), genPoint.getY(),
+						genPoint.getZ());
+			}
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
+	public void scatterplot(GeneticProgram p, GPConfig config){
+		List<Point3D> points = genPoints(p, config);
+		Color c = Color.RED;
+		Coord3d[] cPoints = new Coord3d[points.size()];
+		for(int i = 0; i < points.size(); i ++){
+			Point3D x = points.get(i);
+			cPoints[i] = new Coord3d(x.getX(), x.getY(), x.getZ());
+		}
+		
+		Scatter scatter = new Scatter(cPoints, c);
+		Chart chart = SwingChartComponentFactory.chart(Quality.Intermediate, "newt");
+		chart.getAxeLayout().setMainColor(Color.WHITE);
+		chart.getView().setBackgroundColor(Color.BLACK);
+		chart.getScene().add(scatter);
+		
+		JFrame frame = new JFrame("Stuff");
+		JPanel panel = new JPanel();
+		//panel.setOpaque(false);
+		ICanvas x = chart.getCanvas();
+		if (chart.getCanvas() instanceof Canvas) {
+		   panel.add((Canvas) chart.getCanvas());
+		} else if (chart.getCanvas() instanceof Panel) {
+		   panel.add((Panel) chart.getCanvas());
+		}
+		frame.setContentPane(panel);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
+		
+		
+	}
+
 }
