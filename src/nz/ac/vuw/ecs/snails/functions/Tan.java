@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-import com.sun.org.apache.xml.internal.utils.UnImplNode;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;

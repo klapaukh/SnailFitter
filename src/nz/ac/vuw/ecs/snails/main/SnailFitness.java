@@ -1,26 +1,6 @@
 package nz.ac.vuw.ecs.snails.main;
 
-/*
- SnailFitter snail fitting library
- Copyright (C) 2015  Roman Klapaukh
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-
-import java.awt.Canvas;
-import java.awt.Panel;
+import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -28,25 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+
+import org.math.plot.Plot3DPanel;
+
 import javafx.geometry.Point3D;
 import javafx.scene.transform.Rotate;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import nz.ac.vuw.ecs.fgpj.core.Fitness;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
 import nz.ac.vuw.ecs.fgpj.core.GeneticProgram;
 import nz.ac.vuw.ecs.snails.functions.DifferentiableNode;
 import nz.ac.vuw.ecs.snails.functions.ReturnDouble;
-
-import org.jzy3d.chart.Chart;
-import org.jzy3d.chart.factories.SwingChartComponentFactory;
-import org.jzy3d.colors.Color;
-import org.jzy3d.maths.Coord3d;
-import org.jzy3d.plot3d.primitives.Scatter;
-import org.jzy3d.plot3d.rendering.canvas.ICanvas;
-import org.jzy3d.plot3d.rendering.canvas.Quality;
 
 /**
  * SymbolicFitness attempts to be a general fitness function using Root Mean
@@ -78,8 +50,7 @@ public class SnailFitness extends Fitness {
 			values = new ArrayList<>();
 			Scanner scan = new Scanner(new File(filename));
 			while (scan.hasNext()) {
-				values.add(new Point3D(scan.nextDouble(), scan.nextDouble(),
-						scan.nextDouble()));
+				values.add(new Point3D(scan.nextDouble(), scan.nextDouble(), scan.nextDouble()));
 			}
 			scan.close();
 		} catch (FileNotFoundException e) {
@@ -91,7 +62,8 @@ public class SnailFitness extends Fitness {
 
 	@Override
 	/**
-	 * This populates the values hash map will all of the test cases that will be used for training
+	 * This populates the values hash map will all of the test cases that will
+	 * be used for training
 	 */
 	public void initFitness() {
 		if (filename != null) {
@@ -106,6 +78,10 @@ public class SnailFitness extends Fitness {
 
 	}
 
+	public List<Point3D> getReferenceCurve(){
+		return new ArrayList<Point3D>(values);
+	}
+	
 	public boolean isDirty() {
 		// Fitness function never changes
 		return false;
@@ -114,15 +90,12 @@ public class SnailFitness extends Fitness {
 	@Override
 	public void assignFitness(GeneticProgram p, GPConfig config) {
 		// Create space for the return values and variables
-		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(),
-				new ReturnDouble(), new ReturnDouble() };
+		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(), new ReturnDouble(), new ReturnDouble() };
 
 		// The derivatives let us estimate the speed of line length
 		GeneticProgram dp = new GeneticProgram(3);
 		for (int i = 0; i < 3; i++) {
-			dp.setRoot(
-					((DifferentiableNode) p.getRoot(i)).differentiate(config),
-					i);
+			dp.setRoot(((DifferentiableNode) p.getRoot(i)).differentiate(config), i);
 		}
 
 		// System.out.println(dp.toString());
@@ -158,8 +131,7 @@ public class SnailFitness extends Fitness {
 		// total error starts at zero
 		double error = 0;
 		for (int i = 1; i < values.size(); i++) {
-			t = getTOffset(p, dp, d, t,
-					values.get(i).subtract(values.get(i - 1)).magnitude());
+			t = getTOffset(p, dp, d, t, values.get(i).subtract(values.get(i - 1)).magnitude());
 			// System.out.println(t);
 			setT(d, t);
 			p.evaluate(d);
@@ -184,13 +156,13 @@ public class SnailFitness extends Fitness {
 		return new Point3D(d[0].value(), d[1].value(), d[2].value());
 	}
 
-	public double getTOffset(GeneticProgram p, GeneticProgram dt,
-			ReturnDouble[] d, double oldT, double targetDistance) {
+	public double getTOffset(GeneticProgram p, GeneticProgram dt, ReturnDouble[] d, double oldT,
+			double targetDistance) {
 		return getTOffsetNR(p, dt, d, oldT, targetDistance);
 	}
 
-	public double getTOffsetNR(GeneticProgram p, GeneticProgram dt,
-			ReturnDouble[] d, double oldT, double targetDistance) {
+	public double getTOffsetNR(GeneticProgram p, GeneticProgram dt, ReturnDouble[] d, double oldT,
+			double targetDistance) {
 		// Source value
 		setT(d, oldT);
 		p.evaluate(d);
@@ -231,8 +203,7 @@ public class SnailFitness extends Fitness {
 		return x0;
 	}
 
-	public double getTOffsetLinear(GeneticProgram dt, ReturnDouble[] d,
-			double oldT, double targetDistance) {
+	public double getTOffsetLinear(GeneticProgram dt, ReturnDouble[] d, double oldT, double targetDistance) {
 		setT(d, oldT);
 		dt.evaluate(d);
 		double speed = toPoint3D(d).magnitude();
@@ -268,15 +239,12 @@ public class SnailFitness extends Fitness {
 
 		List<Point3D> list = new ArrayList<>();
 
-		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(),
-				new ReturnDouble(), new ReturnDouble() };
+		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(), new ReturnDouble(), new ReturnDouble() };
 
 		// The derivatives let us estimate the speed of line length
 		GeneticProgram dp = new GeneticProgram(3);
 		for (int i = 0; i < 3; i++) {
-			dp.setRoot(
-					((DifferentiableNode) p.getRoot(i)).differentiate(config),
-					i);
+			dp.setRoot(((DifferentiableNode) p.getRoot(i)).differentiate(config), i);
 		}
 
 		// System.out.println(dp.toString());
@@ -312,8 +280,7 @@ public class SnailFitness extends Fitness {
 		// total error starts at zero
 		double error = 0;
 		for (int i = 1; i < values.size(); i++) {
-			t = getTOffset(p, dp, d, t,
-					values.get(i).subtract(values.get(i - 1)).magnitude());
+			t = getTOffset(p, dp, d, t, values.get(i).subtract(values.get(i - 1)).magnitude());
 			// System.out.println(t);
 			setT(d, t);
 			p.evaluate(d);
@@ -333,46 +300,13 @@ public class SnailFitness extends Fitness {
 			out.println("x,y,z");
 			List<Point3D> points = genPoints(p, config);
 			for (Point3D genPoint : points) {
-				out.printf("%f,%f,%f\n", genPoint.getX(), genPoint.getY(),
-						genPoint.getZ());
+				out.printf("%f,%f,%f\n", genPoint.getX(), genPoint.getY(), genPoint.getZ());
 			}
 			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public void scatterplot(GeneticProgram p, GPConfig config){
-		List<Point3D> points = genPoints(p, config);
-		Color c = Color.RED;
-		Coord3d[] cPoints = new Coord3d[points.size()];
-		for(int i = 0; i < points.size(); i ++){
-			Point3D x = points.get(i);
-			cPoints[i] = new Coord3d(x.getX(), x.getY(), x.getZ());
-		}
-		
-		Scatter scatter = new Scatter(cPoints, c);
-		Chart chart = SwingChartComponentFactory.chart(Quality.Intermediate, "newt");
-		chart.getAxeLayout().setMainColor(Color.WHITE);
-		chart.getView().setBackgroundColor(Color.BLACK);
-		chart.getScene().add(scatter);
-		
-		JFrame frame = new JFrame("Stuff");
-		JPanel panel = new JPanel();
-		//panel.setOpaque(false);
-		ICanvas x = chart.getCanvas();
-		if (chart.getCanvas() instanceof Canvas) {
-		   panel.add((Canvas) chart.getCanvas());
-		} else if (chart.getCanvas() instanceof Panel) {
-		   panel.add((Panel) chart.getCanvas());
-		}
-		frame.setContentPane(panel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
-		frame.setVisible(true);
-		
-		
 	}
 
 }

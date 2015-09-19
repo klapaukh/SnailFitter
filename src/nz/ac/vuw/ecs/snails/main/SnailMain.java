@@ -75,20 +75,24 @@ public class SnailMain {
 		conf.addFunction(new Add());
 		conf.addFunction(new Times());
 		conf.addFunction(new Minus());
-		 conf.addFunction(new Divide());
+		conf.addFunction(new Divide());
 		conf.addFunction(new Exp());
 		conf.addFunction(new Sin());
 		conf.addFunction(new Cos());
 		// conf.addFunction(new Tan());
 		// conf.addFunction(new Sec());
-//		 conf.addFunction(new Ln());
+		// conf.addFunction(new Ln());
 
 		// Fitness functions
-		 SnailFitness sfit = new SnailFitness("raup.csv");
-		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 1);
+		SnailFitness sfit = new SnailFitness("raup.csv");
+		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 10);
+		
+		sfit.initFitness();
+		
+		conf.configModifier = new ProgressTracker(sfit);
 
 		// Create a population
-		Population p = new Population(16, conf);
+		Population p = new Population(160, conf);
 
 		// Everything just returns a double
 		p.setReturnType(ReturnDouble.TYPENUM);
@@ -102,7 +106,7 @@ public class SnailMain {
 		// Begin timing
 		long start = System.currentTimeMillis();
 
-		int gens = 5;
+		int gens = 500;
 		int numGenerations = p.evolve(gens); // return how many generations
 												// actually happened
 		if (numGenerations < gens) {
@@ -115,16 +119,15 @@ public class SnailMain {
 		GeneticProgram s = p.getBest();
 
 		System.out.println("Best program fitness: " + s.getFitness());
-		System.out.println("Number of generations this program has been selected for by elitism immediately prior: " + s.lastChange());
+		System.out.println("Number of generations this program has been selected for by elitism immediately prior: "
+				+ s.lastChange());
 		System.out.println("Crossover usage (ignoring data from other parents): " + s.numCrossovers());
 		System.out.println("Mutation usage (ignoring data from other parents): " + s.numMutations());
 		System.out.println("Elitism usage (ignoring data from other parents): " + s.numElitisms());
 		System.out.println("Best program:");
 		System.out.println(s);
 
-		
 		sfit.draw(s, "snail.csv", conf);
-		sfit.scatterplot(s, conf);
 
 	}
 

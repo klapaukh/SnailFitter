@@ -1,0 +1,3 @@
+*.java text=auto
+*.R text=auto
+* text
