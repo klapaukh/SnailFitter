@@ -21,56 +21,45 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
  * Represents subtraction. Returns the difference between two subtrees
  *
- * @author roma
+ * @author Roman Klapaukh
  *
  */
-public class Minus extends Function implements DifferentiableNode {
+public class Minus extends Function {
 
 	public Minus() {
-		//Minus returns a return double, has two children and is represented by a "-"
+		// Minus returns a return double, has two children and is represented by
+		// a "-"
 		super(ReturnDouble.TYPENUM, 2, "-");
 		for (int i = 0; i < numArgs; i++) {
-			//set the return type of each child to ReturnDouble
+			// set the return type of each child to ReturnDouble
 			setArgNReturnType(i, ReturnDouble.TYPENUM);
 		}
 	}
 
 	@Override
 	public Minus getNew(GPConfig config) {
-		//return a new minus instance
+		// return a new minus instance
 		return new Minus();
 	}
 
 	@Override
 	public void evaluate(ReturnData out) {
-		//cast is safe as we specified what type we expected
+		// cast is safe as we specified what type we expected
 		ReturnDouble d = (ReturnDouble) out;
 
-		//evaluate the first subtree
+		// evaluate the first subtree
 		getArgN(0).evaluate(d);
-		//save the result
+		// save the result
 		double d1 = d.value();
-		//evaluate the second subtree
+		// evaluate the second subtree
 		getArgN(1).evaluate(d);
-		//Set the result to being the difference
+		// Set the result to being the difference
 		d.setValue(d1 - d.value());
-	}
-
-	@Override
-	public Minus differentiate(GPConfig conf) {
-		Minus n = new Minus();
-		for(int i=0;i<this.numArgs;i++){
-			DifferentiableNode c = (DifferentiableNode) getArgN(i);
-			Node dc = c.differentiate(conf);
-			n.setArgN(i, dc);
-		}
-		return n;
 	}
 
 }

@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -31,7 +30,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author roma
  *
  */
-public class Times extends Function implements DifferentiableNode{
+public class Times extends Function {
 
 	public Times() {
 		// This class return a ReturnDouble, it has two children, and it prints
@@ -62,31 +61,6 @@ public class Times extends Function implements DifferentiableNode{
 		getArgN(1).evaluate(d);
 		// Return the product of the two subtrees (as this is multiplication)
 		d.setValue(d.value() * d1);
-	}
-
-	@Override
-	public Add differentiate(GPConfig conf) {
-		Add add = new Add();
-
-		Node f = getArgN(0).copy(conf);
-		Node g = getArgN(0).copy(conf);
-
-		Node fprime = ((DifferentiableNode)f).differentiate(conf);
-		Node gprime = ((DifferentiableNode)f).differentiate(conf);
-
-		Times right = new Times();
-		Times left = new Times();
-
-		left.setArgN(0,f);
-		left.setArgN(1,gprime);
-
-		right.setArgN(0,fprime);
-		right.setArgN(1,g);
-
-		add.setArgN(0, left);
-		add.setArgN(1, right);
-
-		return add;
 	}
 
 }

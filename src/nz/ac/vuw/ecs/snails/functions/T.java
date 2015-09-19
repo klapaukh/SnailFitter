@@ -22,7 +22,6 @@ package nz.ac.vuw.ecs.snails.functions;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 import nz.ac.vuw.ecs.fgpj.core.Terminal;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 
 /**
  * This class represents a single input value called t. This is the input to the
@@ -34,7 +33,7 @@ import nz.ac.vuw.ecs.fgpj.core.Node;
  * @author Roman Klapaukh
  *
  */
-public class T extends Terminal implements DifferentiableNode {
+public class T extends Terminal {
 
 	public T() {
 		// We return a ReturnDouble and print ourselves as "t"
@@ -55,10 +54,5 @@ public class T extends Terminal implements DifferentiableNode {
 		// We just return the value give to use by the ReturnDouble
 		d.setValue(d.getT());
 	}
-
-	public RandomDouble differentiate(GPConfig conf){
-		return new RandomDouble(1);
-	}
-
 
 }

@@ -19,10 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -33,7 +31,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author roma
  *
  */
-public class Tan extends Function implements DifferentiableNode{
+public class Tan extends Function {
 
 	public Tan() {
 		// This Function returns a Return double, has one child and is written
@@ -60,12 +58,6 @@ public class Tan extends Function implements DifferentiableNode{
 		getArgN(0).evaluate(d);
 		// Set the result to being tan(subtree)
 		d.setValue(Math.tan(d.value()));
-	}
-
-	@Override
-	public <F extends Node> F differentiate(GPConfig conf) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("Not implemented - requires SEC");
 	}
 
 }

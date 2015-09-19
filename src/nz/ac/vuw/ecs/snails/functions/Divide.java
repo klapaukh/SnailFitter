@@ -21,7 +21,6 @@ package nz.ac.vuw.ecs.snails.functions;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -31,7 +30,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author Roman Klapaukh
  *
  */
-public class Divide extends Function implements DifferentiableNode {
+public class Divide extends Function {
 
 	public Divide() {
 		// Divide returns a ReturnDouble, has to children and is represented by
@@ -69,39 +68,6 @@ public class Divide extends Function implements DifferentiableNode {
 			// actually divide
 			d.setValue(d1 / d.value());
 		}
-	}
-
-	@Override
-	public Divide differentiate(GPConfig conf) {
-		Node g = getArgN(0).copy(conf);
-		Node h = getArgN(1).copy(conf);
-
-		Node gprime = ((DifferentiableNode) g).differentiate(conf);
-		Node hprime = ((DifferentiableNode) h).differentiate(conf);
-
-		Times left = new Times();
-		Times right = new Times();
-
-		left.setArgN(0, gprime);
-		left.setArgN(1, h);
-
-		right.setArgN(0, g);
-		right.setArgN(1, hprime);
-
-		Minus minus = new Minus();
-
-		minus.setArgN(0, left);
-		minus.setArgN(1, right);
-
-		Times bottom = new Times();
-		bottom.setArgN(0, h.copy(conf));
-		bottom.setArgN(1, h.copy(conf));
-
-		Divide divide = new Divide();
-		divide.setArgN(0, minus);
-		divide.setArgN(1, bottom);
-
-		return divide;
 	}
 
 }

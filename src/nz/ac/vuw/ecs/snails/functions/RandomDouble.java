@@ -31,7 +31,7 @@ import nz.ac.vuw.ecs.fgpj.core.Terminal;
  * @author roma
  *
  */
-public class RandomDouble extends Terminal implements DifferentiableNode{
+public class RandomDouble extends Terminal {
 
 	/**
 	 * Field to store the constant double that a specific instance represents
@@ -133,11 +133,6 @@ public class RandomDouble extends Terminal implements DifferentiableNode{
 
 		// return the newly created object that represents the String
 		return res;
-	}
-
-	@Override
-	public RandomDouble differentiate(GPConfig conf) {
-		return new RandomDouble(0);
 	}
 
 }

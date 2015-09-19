@@ -118,6 +118,7 @@ public class SnailMain {
 		// Get the best program
 		GeneticProgram s = p.getBest();
 
+		System.out.println("Runtime was: " + (end - start)/ (1000d * 60d) + " minutes");
 		System.out.println("Best program fitness: " + s.getFitness());
 		System.out.println("Number of generations this program has been selected for by elitism immediately prior: "
 				+ s.lastChange());

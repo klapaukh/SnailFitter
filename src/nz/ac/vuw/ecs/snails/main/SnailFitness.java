@@ -1,6 +1,5 @@
 package nz.ac.vuw.ecs.snails.main;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -8,16 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.swing.JFrame;
-
-import org.math.plot.Plot3DPanel;
-
 import javafx.geometry.Point3D;
 import javafx.scene.transform.Rotate;
 import nz.ac.vuw.ecs.fgpj.core.Fitness;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
 import nz.ac.vuw.ecs.fgpj.core.GeneticProgram;
-import nz.ac.vuw.ecs.snails.functions.DifferentiableNode;
 import nz.ac.vuw.ecs.snails.functions.ReturnDouble;
 
 /**
@@ -54,9 +48,9 @@ public class SnailFitness extends Fitness {
 			}
 			scan.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Failed to read in reference model file");
 			e.printStackTrace();
-			initFitness();
+			System.exit(-1);
 		}
 	}
 
@@ -78,10 +72,10 @@ public class SnailFitness extends Fitness {
 
 	}
 
-	public List<Point3D> getReferenceCurve(){
+	public List<Point3D> getReferenceCurve() {
 		return new ArrayList<Point3D>(values);
 	}
-	
+
 	public boolean isDirty() {
 		// Fitness function never changes
 		return false;
@@ -89,60 +83,22 @@ public class SnailFitness extends Fitness {
 
 	@Override
 	public void assignFitness(GeneticProgram p, GPConfig config) {
-		// Create space for the return values and variables
-		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(), new ReturnDouble(), new ReturnDouble() };
 
-		// The derivatives let us estimate the speed of line length
-		GeneticProgram dp = new GeneticProgram(3);
-		for (int i = 0; i < 3; i++) {
-			dp.setRoot(((DifferentiableNode) p.getRoot(i)).differentiate(config), i);
-		}
+		List<Point3D> points = genPoints(p, config);
+		double error = rmse(values, points);
+		p.setFitness(error);
 
-		// System.out.println(dp.toString());
-		// The zeroth point is always the same. In fact it provides the
-		// translation required.
-		// The translation is then constantly applied to all points to ensure
-		// that the origins line up. This means it has zero error
-		setT(d, 0);
-		p.evaluate(d);
-		Point3D translation = values.get(0);
-		Point3D model0 = toPoint3D(d);
-		translation = translation.subtract(model0);
+	}
 
-		// System.out.println(translation.toString());
-
-		double distanceTravelled = values.get(1).distance(values.get(0));
-		Point3D targetVector = values.get(1);
-
-		double firstT = getTOffset(p, dp, d, 0, distanceTravelled);
-
-		setT(d, firstT);
-		p.evaluate(d);
-
-		// Remember to translate to the transformed origin
-		Point3D model1 = toPoint3D(d).subtract(translation);
-
-		Rotate r = getRotationBetween(model1, targetVector);
-		// System.out.println(r.toString());
-
-		// Test each program on every point in the hash map and sum the squared
-		// error
-		double t = 0;
-		// total error starts at zero
+	public double rmse(List<Point3D> reference, List<Point3D> generated) {
 		double error = 0;
-		for (int i = 1; i < values.size(); i++) {
-			t = getTOffset(p, dp, d, t, values.get(i).subtract(values.get(i - 1)).magnitude());
-			// System.out.println(t);
-			setT(d, t);
-			p.evaluate(d);
-			Point3D genPoint = toPoint3D(d).subtract(translation);
-			genPoint = r.transform(genPoint);
-			error += Math.pow(genPoint.subtract(values.get(i)).magnitude(), 2);
-		}
-		// Make into RMS error and assign to the program
-		error /= values.size();
-		p.setFitness(Math.sqrt(error));
+		for (int i = 0; i < generated.size(); i++) {
+			Point3D r = reference.get(i);
+			Point3D g = generated.get(i);
 
+			error += Math.pow(r.subtract(g).magnitude(), 2);
+		}
+		return Math.sqrt(error);
 	}
 
 	public Rotate getRotationBetween(Point3D source, Point3D target) {
@@ -156,59 +112,13 @@ public class SnailFitness extends Fitness {
 		return new Point3D(d[0].value(), d[1].value(), d[2].value());
 	}
 
-	public double getTOffset(GeneticProgram p, GeneticProgram dt, ReturnDouble[] d, double oldT,
-			double targetDistance) {
-		return getTOffsetNR(p, dt, d, oldT, targetDistance);
+	public double getTOffset(GeneticProgram p, ReturnDouble[] d, double oldT, double targetDistance) {
+		return getTOffsetLinear(p, d, oldT, targetDistance);
 	}
 
-	public double getTOffsetNR(GeneticProgram p, GeneticProgram dt, ReturnDouble[] d, double oldT,
-			double targetDistance) {
-		// Source value
-		setT(d, oldT);
-		p.evaluate(d);
-		Point3D source = toPoint3D(d);
-
-		double initialx0 = getTOffsetLinear(dt, d, oldT, targetDistance);
-		double x0 = initialx0;
-		setT(d, x0);
-		p.evaluate(d);
-
-		double f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
-
-		int count = 0;
-		while (Math.abs(f0) > targetDistance * 0.001) {
-			dt.evaluate(d);
-			double fprime0 = toPoint3D(d).magnitude();
-
-			if (!Double.isFinite(fprime0)) {
-				return initialx0;
-			}
-
-			x0 = x0 - f0 / fprime0;
-
-			setT(d, x0);
-			p.evaluate(d);
-			f0 = toPoint3D(d).subtract(source).magnitude() - targetDistance;
-
-			count++;
-			if (count > 10) {
-				return initialx0;
-			}
-		}
-
-		// System.out.printf("%f, %f, ", targetDistance, f0);
-		if (oldT > x0) {
-			return initialx0;
-		}
-		return x0;
-	}
-
-	public double getTOffsetLinear(GeneticProgram dt, ReturnDouble[] d, double oldT, double targetDistance) {
-		setT(d, oldT);
-		dt.evaluate(d);
-		double speed = toPoint3D(d).magnitude();
-
-		return oldT + targetDistance / speed;
+	public double getTOffsetLinear(GeneticProgram p, ReturnDouble[] d, double oldT, double targetDistance) {
+		// TODO make this even vaguely sensible
+		return oldT + 0.01;
 	}
 
 	public void setT(ReturnDouble[] d, double v) {
@@ -236,18 +146,10 @@ public class SnailFitness extends Fitness {
 
 	public List<Point3D> genPoints(GeneticProgram p, GPConfig config) {
 		// Create space for the return values and variables
-
 		List<Point3D> list = new ArrayList<>();
 
 		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(), new ReturnDouble(), new ReturnDouble() };
 
-		// The derivatives let us estimate the speed of line length
-		GeneticProgram dp = new GeneticProgram(3);
-		for (int i = 0; i < 3; i++) {
-			dp.setRoot(((DifferentiableNode) p.getRoot(i)).differentiate(config), i);
-		}
-
-		// System.out.println(dp.toString());
 		// The zeroth point is always the same. In fact it provides the
 		// translation required.
 		// The translation is then constantly applied to all points to ensure
@@ -263,7 +165,7 @@ public class SnailFitness extends Fitness {
 		double distanceTravelled = values.get(1).distance(values.get(0));
 		Point3D targetVector = values.get(1);
 
-		double firstT = getTOffset(p, dp, d, 0, distanceTravelled);
+		double firstT = getTOffset(p, d, 0, distanceTravelled);
 
 		setT(d, firstT);
 		p.evaluate(d);
@@ -277,10 +179,8 @@ public class SnailFitness extends Fitness {
 		// Test each program on every point in the hash map and sum the squared
 		// error
 		double t = 0;
-		// total error starts at zero
-		double error = 0;
 		for (int i = 1; i < values.size(); i++) {
-			t = getTOffset(p, dp, d, t, values.get(i).subtract(values.get(i - 1)).magnitude());
+			t = getTOffset(p, d, t, values.get(i).subtract(values.get(i - 1)).magnitude());
 			// System.out.println(t);
 			setT(d, t);
 			p.evaluate(d);
@@ -304,7 +204,7 @@ public class SnailFitness extends Fitness {
 			}
 			out.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Failed to write the best individual to a file");
 			e.printStackTrace();
 		}
 	}

@@ -21,19 +21,20 @@ package nz.ac.vuw.ecs.snails.functions;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
- * This class represents the addition operator. It takes the results of its two children and returns the sum of them as Java doubles
+ * This class represents the addition operator. It takes the results of its two
+ * children and returns the sum of them as Java doubles
  *
  * @author Roman Klapaukh
  *
  */
-public class Add extends Function implements DifferentiableNode {
+public class Add extends Function {
 
 	public Add() {
-		// The add Function returns a ReturnDouble, has 2 children and is represented by "+"
+		// The add Function returns a ReturnDouble, has 2 children and is
+		// represented by "+"
 		super(ReturnDouble.TYPENUM, 2, "+");
 		for (int i = 0; i < numArgs; i++) {
 			// Set the expected return type of each child to ReturnDouble
@@ -59,17 +60,6 @@ public class Add extends Function implements DifferentiableNode {
 		getArgN(1).evaluate(d);
 		// Set the result to be the sum
 		d.setValue(d.value() + d1);
-	}
-
-	@Override
-	public Add differentiate(GPConfig conf) {
-		Add n = new Add();
-		for(int i=0;i<this.numArgs;i++){
-			DifferentiableNode c = (DifferentiableNode) getArgN(i);
-			Node dc = c.differentiate(conf);
-			n.setArgN(i, dc);
-		}
-		return n;
 	}
 
 }

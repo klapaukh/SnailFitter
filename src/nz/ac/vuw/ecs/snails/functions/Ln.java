@@ -21,7 +21,6 @@ package nz.ac.vuw.ecs.snails.functions;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -30,7 +29,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author Roman Klapaukh
  *
  */
-public class Ln extends Function implements DifferentiableNode {
+public class Ln extends Function {
 
 	public Ln() {
 		// This returns a ReturnDouble, has one child and is written "ln"
@@ -51,29 +50,15 @@ public class Ln extends Function implements DifferentiableNode {
 	public void evaluate(ReturnData out) {
 		// The cast is safe as we specified what we expect in the constructor
 		ReturnDouble d = (ReturnDouble) out;
-		//evaluate the subtree
+		// evaluate the subtree
 		getArgN(0).evaluate(d);
-		//The result is ln(subtree)
-		//You can't just take a natural log.
-		if(d.value() < 0.00005){
+		// The result is ln(subtree)
+		// You can't just take a natural log.
+		if (d.value() < 0.00005) {
 			d.setValue(0);
-		}else{
+		} else {
 			d.setValue(Math.log(d.value()));
 		}
-	}
-
-	@Override
-	public Divide differentiate(GPConfig conf) {
-		Divide divide = new Divide();
-		
-		Node c = getArgN(0).copy(conf);
-		Node gprime = ((DifferentiableNode)c).differentiate(conf);
-		
-
-		divide.setArgN(0, gprime);
-		divide.setArgN(1, c);
-
-		return divide;
 	}
 
 }

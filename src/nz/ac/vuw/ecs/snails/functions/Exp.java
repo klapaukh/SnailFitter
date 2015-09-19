@@ -21,7 +21,6 @@ package nz.ac.vuw.ecs.snails.functions;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -30,7 +29,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author Roman Klapaukh
  *
  */
-public class Exp extends Function implements DifferentiableNode {
+public class Exp extends Function {
 
 	public Exp() {
 		// This returns a ReturnDouble, has one child and is written "e"
@@ -51,24 +50,10 @@ public class Exp extends Function implements DifferentiableNode {
 	public void evaluate(ReturnData out) {
 		// The cast is safe as we specified what we expect in the constructor
 		ReturnDouble d = (ReturnDouble) out;
-		//evaluate the subtree
+		// evaluate the subtree
 		getArgN(0).evaluate(d);
-		//The result is e^(subtree)
+		// The result is e^(subtree)
 		d.setValue(Math.exp(d.value()));
-	}
-
-	@Override
-	public Times differentiate(GPConfig conf) {
-		Times times = new Times();
-		Exp exp = new Exp();
-		Node c = getArgN(0).copy(conf);
-		Node gprime = ((DifferentiableNode)c).differentiate(conf);
-		exp.setArgN(0, c);
-
-		times.setArgN(0, exp);
-		times.setArgN(1, gprime);
-
-		return times;
 	}
 
 }

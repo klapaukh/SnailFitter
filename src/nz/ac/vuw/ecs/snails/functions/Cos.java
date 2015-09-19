@@ -21,7 +21,6 @@ package nz.ac.vuw.ecs.snails.functions;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -31,7 +30,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author Roman Klapaukh
  *
  */
-public class Cos extends Function implements DifferentiableNode {
+public class Cos extends Function {
 
 	public Cos() {
 		// This node returns a ReturnDouble, has one subtree and is called "Cos"
@@ -56,26 +55,6 @@ public class Cos extends Function implements DifferentiableNode {
 		getArgN(0).evaluate(d);
 		// Set the result to be cos(subtreeResult)
 		d.setValue(Math.cos(d.value()));
-	}
-
-	@Override
-	public Times differentiate(GPConfig conf) {
-		Times times = new Times();
-		Sin sin = new Sin();
-		Node c = getArgN(0).copy(conf);
-		Node gprime = ((DifferentiableNode)c).differentiate(conf);
-		sin.setArgN(0, c);
-
-		Times minus = new Times();
-		RandomDouble mone = new RandomDouble(-1);
-
-		minus.setArgN(0, mone);
-		minus.setArgN(1, sin);
-
-		times.setArgN(0, minus);
-		times.setArgN(1, gprime);
-
-		return times;
 	}
 
 }

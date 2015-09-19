@@ -21,7 +21,6 @@ package nz.ac.vuw.ecs.snails.functions;
 
 import nz.ac.vuw.ecs.fgpj.core.Function;
 import nz.ac.vuw.ecs.fgpj.core.GPConfig;
-import nz.ac.vuw.ecs.fgpj.core.Node;
 import nz.ac.vuw.ecs.fgpj.core.ReturnData;
 
 /**
@@ -31,7 +30,7 @@ import nz.ac.vuw.ecs.fgpj.core.ReturnData;
  * @author Roman Klapaukh
  *
  */
-public class Sin extends Function implements DifferentiableNode {
+public class Sin extends Function {
 
 	public Sin() {
 		// This node returns a ReturnDouble, has one subtree and is called "Sin"
@@ -56,20 +55,6 @@ public class Sin extends Function implements DifferentiableNode {
 		getArgN(0).evaluate(d);
 		// Set the result to be sin(subtreeResult)
 		d.setValue(Math.sin(d.value()));
-	}
-
-	@Override
-	public Times differentiate(GPConfig conf) {
-		Times times = new Times();
-		Cos cos = new Cos();
-		Node c = getArgN(0).copy(conf);
-		Node gprime = ((DifferentiableNode)c).differentiate(conf);
-		cos.setArgN(0, c);
-
-		times.setArgN(0, cos);
-		times.setArgN(1, gprime);
-
-		return times;
 	}
 
 }
