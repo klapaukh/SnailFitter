@@ -28,6 +28,8 @@ import nz.ac.vuw.ecs.snails.functions.Add;
 import nz.ac.vuw.ecs.snails.functions.Cos;
 import nz.ac.vuw.ecs.snails.functions.Divide;
 import nz.ac.vuw.ecs.snails.functions.Exp;
+import nz.ac.vuw.ecs.snails.functions.GenExp;
+import nz.ac.vuw.ecs.snails.functions.Ln;
 import nz.ac.vuw.ecs.snails.functions.Minus;
 import nz.ac.vuw.ecs.snails.functions.RandomDouble;
 import nz.ac.vuw.ecs.snails.functions.ReturnDouble;
@@ -80,15 +82,15 @@ public class SnailMain {
 		conf.addFunction(new Sin());
 		conf.addFunction(new Cos());
 		// conf.addFunction(new Tan());
-		// conf.addFunction(new Sec());
-		// conf.addFunction(new Ln());
+		conf.addFunction(new Ln());
+		conf.addFunction(new GenExp());
 
 		// Fitness functions
 		SnailFitness sfit = new SnailFitness("raup.csv");
 		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 10);
-		
+
 		sfit.initFitness();
-		
+
 		conf.configModifier = new ProgressTracker(sfit);
 
 		// Create a population
@@ -118,7 +120,7 @@ public class SnailMain {
 		// Get the best program
 		GeneticProgram s = p.getBest();
 
-		System.out.println("Runtime was: " + (end - start)/ (1000d * 60d) + " minutes");
+		System.out.println("Runtime was: " + (end - start) / (1000d * 60d) + " minutes");
 		System.out.println("Best program fitness: " + s.getFitness());
 		System.out.println("Number of generations this program has been selected for by elitism immediately prior: "
 				+ s.lastChange());

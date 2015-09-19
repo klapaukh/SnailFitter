@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.math.plot.Plot3DPanel;
 
@@ -128,7 +129,7 @@ public class ProgressTracker implements ConfigModifier {
 			}
 
 			plot.changePlotData(1, XY);
-			plot.repaint();
+			SwingUtilities.invokeLater(()-> plot.repaint());
 		}
 	}
 
