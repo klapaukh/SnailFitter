@@ -2,7 +2,7 @@
 bin/
 *.gen
 run-log.txt
-raup.csv
+raup*.csv
 snail.csv
 
 
