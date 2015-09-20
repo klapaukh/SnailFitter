@@ -57,7 +57,7 @@ public class SnailMain {
 	public static void main(String[] args) {
 
 		// 3 trees - one for each dimension
-		GPConfig conf = new GPConfig(3, 1, 6, 0.70, 0.28, 0.02);
+		GPConfig conf = new GPConfig(2, 1, 6, 0.70, 0.28, 0.02);
 
 		// Each generation basic statistics about that generation will be logged
 		// to this file.
@@ -129,8 +129,6 @@ public class SnailMain {
 		System.out.println("Elitism usage (ignoring data from other parents): " + s.numElitisms());
 		System.out.println("Best program:");
 		System.out.println(s);
-
-		sfit.draw(s, "snail.csv", conf);
 
 	}
 

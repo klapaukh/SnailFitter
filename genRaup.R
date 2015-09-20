@@ -32,7 +32,7 @@ points %>%
   write.table(file="raupCart.csv",row.names = F, col.names = F, sep=" ")
 
 points %>%
-  select(r,theta,y) %>%
+  select(theta,r,y) %>%
   write.table(file="raupCyl.csv",row.names = F, col.names = F, sep=" ")
 
 

@@ -108,17 +108,8 @@ public class SnailFitness extends Fitness {
 		return r;
 	}
 
-	public Point3D toPoint3D(ReturnDouble[] d) {
-		return new Point3D(d[0].value(), d[1].value(), d[2].value());
-	}
-
-	public double getTOffset(GeneticProgram p, ReturnDouble[] d, double oldT, double targetDistance) {
-		return getTOffsetLinear(p, d, oldT, targetDistance);
-	}
-
-	public double getTOffsetLinear(GeneticProgram p, ReturnDouble[] d, double oldT, double targetDistance) {
-		// TODO make this even vaguely sensible
-		return oldT + 0.01;
+	public Point3D toPoint3D(double t, ReturnDouble[] d) {
+		return new Point3D(t, d[0].value(), d[1].value());
 	}
 
 	public void setT(ReturnDouble[] d, double v) {
@@ -148,65 +139,18 @@ public class SnailFitness extends Fitness {
 		// Create space for the return values and variables
 		List<Point3D> list = new ArrayList<>();
 
-		ReturnDouble d[] = new ReturnDouble[] { new ReturnDouble(), new ReturnDouble(), new ReturnDouble() };
+		ReturnDouble d[] = new ReturnDouble[] {new ReturnDouble(), new ReturnDouble()};
 
-		// The zeroth point is always the same. In fact it provides the
-		// translation required.
-		// The translation is then constantly applied to all points to ensure
-		// that the origins line up. This means it has zero error
-		setT(d, 0);
-		p.evaluate(d);
-		Point3D translation = values.get(0);
-		Point3D model0 = toPoint3D(d);
-		translation = translation.subtract(model0);
-
-		// System.out.println(translation.toString());
-
-		double distanceTravelled = values.get(1).distance(values.get(0));
-		Point3D targetVector = values.get(1);
-
-		double firstT = getTOffset(p, d, 0, distanceTravelled);
-
-		setT(d, firstT);
-		p.evaluate(d);
-
-		// Remember to translate to the transformed origin
-		Point3D model1 = toPoint3D(d).subtract(translation);
-
-		Rotate r = getRotationBetween(model1, targetVector);
-		// System.out.println(r.toString());
-
-		// Test each program on every point in the hash map and sum the squared
-		// error
-		double t = 0;
-		for (int i = 1; i < values.size(); i++) {
-			t = getTOffset(p, d, t, values.get(i).subtract(values.get(i - 1)).magnitude());
-			// System.out.println(t);
-			setT(d, t);
+		for (int i = 0; i < values.size(); i++) {
+			Point3D t = values.get(i);
+			setT(d, t.getX());
 			p.evaluate(d);
-			Point3D genPoint = toPoint3D(d).subtract(translation);
-			genPoint = r.transform(genPoint);
+			Point3D genPoint = toPoint3D(t.getX(),d);
 			list.add(genPoint);
 		}
 
 		return list;
 
-	}
-
-	public void draw(GeneticProgram p, String filename, GPConfig config) {
-		try {
-			PrintStream out = null;
-			out = new PrintStream(new File(filename));
-			out.println("x,y,z");
-			List<Point3D> points = genPoints(p, config);
-			for (Point3D genPoint : points) {
-				out.printf("%f,%f,%f\n", genPoint.getX(), genPoint.getY(), genPoint.getZ());
-			}
-			out.close();
-		} catch (FileNotFoundException e) {
-			System.err.println("Failed to write the best individual to a file");
-			e.printStackTrace();
-		}
 	}
 
 }

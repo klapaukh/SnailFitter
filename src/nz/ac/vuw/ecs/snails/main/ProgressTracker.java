@@ -21,7 +21,7 @@ import nz.ac.vuw.ecs.fgpj.core.Population;
  * reference shell. It will update as the evolution progresses. To prevent this
  * from holding up execution, as much as possible of this job will run in a
  * separate thread.
- * 
+ *
  * @author Roman Klapaukh
  *
  */
@@ -35,7 +35,7 @@ public class ProgressTracker implements ConfigModifier {
 	 * Create new ProgressTracker. This requires a SnailFitness to both get the
 	 * reference curve and then later to evaluate the best program and gets its
 	 * curve.
-	 * 
+	 *
 	 * @param fit
 	 *            The SnailFitness to use for the reference curve and then later
 	 *            for getting the curves of generated solutions.
@@ -52,8 +52,8 @@ public class ProgressTracker implements ConfigModifier {
 
 		for (int i = 0; i < points.size(); i++) {
 			Point3D pi = points.get(i);
-			x[i] = pi.getX() * Math.sin(pi.getY());
-			y[i] = pi.getX() * Math.cos(pi.getY());
+			x[i] = pi.getY() * Math.sin(pi.getX());
+			y[i] = pi.getY() * Math.cos(pi.getX());
 			z[i] = pi.getZ();
 		}
 
@@ -81,7 +81,7 @@ public class ProgressTracker implements ConfigModifier {
 		GeneticProgram p = pop.getBest();
 		if(p.lastChange() > 0){
 			//Don't waste CPU cycles on elitism
-			return; 
+			return;
 		}
 		// Don't actually do it in the main program thread. Just add it to the
 		// todo
@@ -90,7 +90,7 @@ public class ProgressTracker implements ConfigModifier {
 
 	/**
 	 * This represents a single update the plot task.
-	 * 
+	 *
 	 * @author Roman Klapaukh
 	 *
 	 */
@@ -100,12 +100,12 @@ public class ProgressTracker implements ConfigModifier {
 
 		/**
 		 * Create a new update the plot task.
-		 * 
+		 *
 		 * @param p
 		 *            The individual to plot
 		 * @param conf
 		 *            The GPConfig being used
-		 * 
+		 *
 		 */
 		public UpdateJob(GeneticProgram p, GPConfig conf) {
 			this.p = p;
@@ -122,8 +122,8 @@ public class ProgressTracker implements ConfigModifier {
 			double[][] XY = new double[points.size()][3];
 			for (int i = 0; i < points.size(); i++) {
 				Point3D pi = points.get(i);
-				XY[i][0] = pi.getX()*Math.sin(pi.getY());
-				XY[i][1] = pi.getX()*Math.cos(pi.getY());;
+				XY[i][0] = pi.getY()*Math.sin(pi.getX());
+				XY[i][1] = pi.getY()*Math.cos(pi.getX());;
 				XY[i][2] = pi.getZ();
 
 			}
