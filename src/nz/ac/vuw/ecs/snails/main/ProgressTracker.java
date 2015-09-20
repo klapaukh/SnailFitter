@@ -52,8 +52,8 @@ public class ProgressTracker implements ConfigModifier {
 
 		for (int i = 0; i < points.size(); i++) {
 			Point3D pi = points.get(i);
-			x[i] = pi.getX();
-			y[i] = pi.getY();
+			x[i] = pi.getX() * Math.sin(pi.getY());
+			y[i] = pi.getX() * Math.cos(pi.getY());
 			z[i] = pi.getZ();
 		}
 
@@ -122,8 +122,8 @@ public class ProgressTracker implements ConfigModifier {
 			double[][] XY = new double[points.size()][3];
 			for (int i = 0; i < points.size(); i++) {
 				Point3D pi = points.get(i);
-				XY[i][0] = pi.getX();
-				XY[i][1] = pi.getY();
+				XY[i][0] = pi.getX()*Math.sin(pi.getY());
+				XY[i][1] = pi.getX()*Math.cos(pi.getY());;
 				XY[i][2] = pi.getZ();
 
 			}

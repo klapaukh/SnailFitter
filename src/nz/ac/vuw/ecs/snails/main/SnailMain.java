@@ -86,7 +86,7 @@ public class SnailMain {
 		conf.addFunction(new GenExp());
 
 		// Fitness functions
-		SnailFitness sfit = new SnailFitness("raup.csv");
+		SnailFitness sfit = new SnailFitness("raupCyl.csv");
 		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 10);
 
 		sfit.initFitness();

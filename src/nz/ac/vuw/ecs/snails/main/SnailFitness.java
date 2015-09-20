@@ -67,7 +67,7 @@ public class SnailFitness extends Fitness {
 		values = new ArrayList<Point3D>();
 
 		for (double t = 0; t < 100; t += 0.1) {
-			values.add(new Point3D(Math.cos(t), Math.sin(t), t));
+			values.add(new Point3D(t, t, t));
 		}
 
 	}
