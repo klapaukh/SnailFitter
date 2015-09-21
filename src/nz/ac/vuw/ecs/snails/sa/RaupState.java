@@ -37,7 +37,7 @@ public class RaupState {
 			neww += shift;
 			break;
 		case 1:
-			newr0 += shift;
+			newt += shift;
 			break;
 		case 2:
 			newrc += shift;
@@ -46,13 +46,13 @@ public class RaupState {
 			newy0 += shift;
 			break;
 		case 4:
-			newt += shift;
+			newr0 += shift;
 			break;
 		default:
-			throw new RuntimeException("Ah the move when wrong");
+			throw new RuntimeException("Ah the move went wrong");
 		}
 
-		return new RaupState(neww, newr0, newrc, newy0, newt);
+		return new RaupState(newr0, newy0, newrc, neww, newt);
 	}
 
 	public String toString() {

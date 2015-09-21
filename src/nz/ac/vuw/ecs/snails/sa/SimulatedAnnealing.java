@@ -19,7 +19,7 @@ import org.math.plot.Plot3DPanel;
 
 public class SimulatedAnnealing {
 
-	private int maxIterations = 10000;
+	private int maxIterations = 100000;
 	private float maxTemperature = 1000.0f;
 	private float minTemperature = 0.00001f;
 	private Scale scale;
@@ -92,7 +92,7 @@ public class SimulatedAnnealing {
 	}
 
 	private RaupState neighbour(RaupState s) {
-		return s.moveRandom(r, 0.1f);
+		return s.moveRandom(r, 0.01);
 	}
 
 	private double temperature(int f) {
@@ -162,13 +162,13 @@ public class SimulatedAnnealing {
 				Point3D pi = points.get(i);
 				XY[i][0] = pi.getY() * Math.sin(pi.getX());
 				XY[i][1] = pi.getY() * Math.cos(pi.getX());
-				;
 				XY[i][2] = pi.getZ();
 
 			}
 
 			SwingUtilities.invokeLater(() -> {
 				plot.changePlotData(1, XY);
+				plot.setAutoBounds();
 				plot.repaint();
 			});
 		}
