@@ -69,6 +69,8 @@ public class SimulatedAnnealing {
 		tp = Executors.newSingleThreadExecutor();
 
 		RaupState s = new RaupState();
+		tp.submit(new UpdateJob(s));
+
 		double distance = s.distanceTo(reference); // the error between s and
 													// the reference
 
