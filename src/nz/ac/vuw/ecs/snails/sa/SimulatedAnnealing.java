@@ -39,9 +39,9 @@ public class SimulatedAnnealing {
 	}
 
 	public RaupState minimise() {
-		plot = new Plot3DPanel();
 
 		if (gui) {
+			plot = new Plot3DPanel();
 			double[] x = new double[reference.size()];
 			double[] y = new double[reference.size()];
 			double[] z = new double[reference.size()];
