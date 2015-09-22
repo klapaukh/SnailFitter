@@ -18,8 +18,8 @@ public class RaupState {
 		this.t = t;
 	}
 
-	public RaupState() {
-		this(1, 1, 1, 3.5, 0);
+	public RaupState(Random r) {
+		this(r.nextDouble(), r.nextDouble(), r.nextDouble(), r.nextDouble() * 30 , r.nextDouble() * 5);
 	}
 
 	public RaupState moveRandom(Random r, double range) {

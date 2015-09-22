@@ -1,12 +1,9 @@
 #! /usr/bin/env Rscript
 
 library(dplyr)
-#library(scatterplot3d)
-#library(rgl)
 
-
-w  = 3.5
-t  = 0
+w  = 10
+t  = 3
 d  = 0
 r0 = 1
 y0 = 1
@@ -34,9 +31,4 @@ points %>%
 points %>%
   select(theta,r,y) %>%
   write.table(file="raupCyl.csv",row.names = F, col.names = F, sep=" ")
-
-
-#fitted = read.csv("snail.csv")
-#with(points, plot3d(a,b,c,col="red"))
-#with(fitted, plot3d(x,y,z,col = "blue",add = T))
 

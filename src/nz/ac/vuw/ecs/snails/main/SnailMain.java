@@ -56,6 +56,8 @@ public class SnailMain {
 	 */
 	public static void main(String[] args) {
 
+		boolean gui = false;
+
 		// 3 trees - one for each dimension
 		GPConfig conf = new GPConfig(2, 1, 6, 0.70, 0.28, 0.02);
 
@@ -89,10 +91,11 @@ public class SnailMain {
 		SnailFitness sfit = new SnailFitness("raupCyl.csv");
 		conf.fitnessObject = new ParallelFitness<SnailFitness>(sfit, 16, 10);
 
-		sfit.initFitness();
-
-		conf.configModifier = new ProgressTracker(sfit);
-
+		if (gui) {
+			sfit.initFitness();
+			conf.configModifier = new ProgressTracker(sfit);
+		}
+		
 		// Create a population
 		Population p = new Population(160, conf);
 
@@ -112,7 +115,7 @@ public class SnailMain {
 		int numGenerations = p.evolve(gens); // return how many generations
 												// actually happened
 		if (numGenerations < gens) {
-			System.out.println("Terminated early");
+//			System.out.println("Terminated early");
 		}
 		// end timing
 		long end = System.currentTimeMillis();

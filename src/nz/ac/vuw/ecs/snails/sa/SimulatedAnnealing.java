@@ -29,47 +29,56 @@ public class SimulatedAnnealing {
 	// Visualisation
 	Plot3DPanel plot;
 	ExecutorService tp;
+	boolean gui;
 
-	public SimulatedAnnealing(List<Point3D> reference) {
+	public SimulatedAnnealing(List<Point3D> reference, boolean gui) {
 		scale = new GeometricScale(maxIterations, minTemperature, maxTemperature);
 		r = new Random();
+		this.gui = gui;
 		this.reference = reference;
 	}
 
 	public RaupState minimise() {
 		plot = new Plot3DPanel();
 
-		double[] x = new double[reference.size()];
-		double[] y = new double[reference.size()];
-		double[] z = new double[reference.size()];
+		if (gui) {
+			double[] x = new double[reference.size()];
+			double[] y = new double[reference.size()];
+			double[] z = new double[reference.size()];
 
-		for (int i = 0; i < reference.size(); i++) {
-			Point3D pi = reference.get(i);
-			x[i] = pi.getY() * Math.sin(pi.getX());
-			y[i] = pi.getY() * Math.cos(pi.getX());
-			z[i] = pi.getZ();
+			for (int i = 0; i < reference.size(); i++) {
+				Point3D pi = reference.get(i);
+				x[i] = pi.getY() * Math.sin(pi.getX());
+				y[i] = pi.getY() * Math.cos(pi.getX());
+				z[i] = pi.getZ();
+			}
+
+			// add the reference curve
+			plot.addScatterPlot("Reference", Color.BLUE, x, y, z);
+
+			// Add a space for the current best to be displayed
+			plot.addScatterPlot("Best individual", Color.RED, x, y, z);
+
+			// put the PlotPanel in a JFrame, as a JPanel
+			JFrame frame = new JFrame("Snail Hugging Progress");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setContentPane(plot);
+			frame.setSize(1000, 800);
+			frame.setVisible(true);
+
+			// Don't want this to get in the way of other stuff so lock it to
+			// only
+			// having a single thread. The fitness evaluation should always have
+			// most of the cores available to it
+			tp = Executors.newSingleThreadExecutor();
+
 		}
 
-		// add the reference curve
-		plot.addScatterPlot("Reference", Color.BLUE, x, y, z);
+		RaupState s = new RaupState(r);
 
-		// Add a space for the current best to be displayed
-		plot.addScatterPlot("Best individual", Color.RED, x, y, z);
-
-		// put the PlotPanel in a JFrame, as a JPanel
-		JFrame frame = new JFrame("Snail Hugging Progress");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setContentPane(plot);
-		frame.setSize(1000, 800);
-		frame.setVisible(true);
-
-		// Don't want this to get in the way of other stuff so lock it to only
-		// having a single thread. The fitness evaluation should always have
-		// most of the cores available to it
-		tp = Executors.newSingleThreadExecutor();
-
-		RaupState s = new RaupState();
-		tp.submit(new UpdateJob(s));
+		if (gui) {
+			tp.submit(new UpdateJob(s));
+		}
 
 		double distance = s.distanceTo(reference); // the error between s and
 													// the reference
@@ -85,7 +94,9 @@ public class SimulatedAnnealing {
 			if (r.nextDouble() < accept(distance, distanceNew, temperature)) {
 				s = sNew;
 				distance = distanceNew;
-				tp.submit(new UpdateJob(sNew));
+				if (gui) {
+					tp.submit(new UpdateJob(sNew));
+				}
 			}
 		}
 		return s;
@@ -107,7 +118,29 @@ public class SimulatedAnnealing {
 	}
 
 	public static void main(String[] args) {
-		String filename = "raupCyl.csv";
+		if (args.length < 1 || args.length > 2) {
+			System.err.println("Usage:");
+			System.err.println("java -jar sa.jar <targetFilename> [batch|gui]");
+			System.exit(-1);
+		}
+
+		String filename = args[0];
+
+		boolean gui = true;
+		if (args.length == 2) {
+			switch (args[1]) {
+			case "batch":
+				gui = false;
+				break;
+			case "gui":
+				gui = true;
+				break;
+			default:
+				System.err.println("Unsupported argument: " + args[1]);
+				System.exit(-1);
+			}
+		}
+
 		List<Point3D> values = null;
 
 		try {
@@ -123,9 +156,12 @@ public class SimulatedAnnealing {
 			System.exit(-1);
 		}
 
-		SimulatedAnnealing sa = new SimulatedAnnealing(values);
+		SimulatedAnnealing sa = new SimulatedAnnealing(values, gui);
+		long start = System.currentTimeMillis();
 		RaupState s = sa.minimise();
-		System.out.println(s.toString() + " - " + s.distanceTo(values));
+		long end = System.currentTimeMillis();
+		System.out.println("time,w,r0,rc,y0,t,rmse");
+		System.out.printf("%d,%f,%f,%f,%f,%f,%f\n", end - start, s.w, s.r0, s.rc, s.y0, s.t, s.distanceTo(values));
 	}
 
 	/**
