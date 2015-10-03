@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javafx.geometry.Point3D;
 
@@ -19,9 +21,9 @@ import org.math.plot.Plot3DPanel;
 
 public class SimulatedAnnealing {
 
-	private int maxIterations = 100000;
-	private float maxTemperature = 1000.0f;
-	private float minTemperature = 0.00001f;
+	private int maxIterations = 1000000;
+	private float maxTemperature = 10.0f;
+	private float minTemperature = 0.000001f;
 	private Scale scale;
 	private Random r;
 	private List<Point3D> reference;
@@ -118,17 +120,18 @@ public class SimulatedAnnealing {
 	}
 
 	public static void main(String[] args) {
-		if (args.length < 1 || args.length > 2) {
+		if (args.length < 2 || args.length > 3) {
 			System.err.println("Usage:");
-			System.err.println("java -jar sa.jar <targetFilename> [batch|gui]");
+			System.err.println("java -jar sa.jar <targetFilename> number [batch|gui]");
 			System.exit(-1);
 		}
 
 		String filename = args[0];
+		int numberOfRuns = Integer.parseInt(args[1]);
 
 		boolean gui = true;
-		if (args.length == 2) {
-			switch (args[1]) {
+		if (args.length == 3) {
+			switch (args[2]) {
 			case "batch":
 				gui = false;
 				break;
@@ -141,10 +144,9 @@ public class SimulatedAnnealing {
 			}
 		}
 
-		List<Point3D> values = null;
+		final List<Point3D> values = new ArrayList<>();
 
 		try {
-			values = new ArrayList<>();
 			Scanner scan = new Scanner(new File(filename));
 			while (scan.hasNext()) {
 				values.add(new Point3D(scan.nextDouble(), scan.nextDouble(), scan.nextDouble()));
@@ -156,12 +158,33 @@ public class SimulatedAnnealing {
 			System.exit(-1);
 		}
 
-		SimulatedAnnealing sa = new SimulatedAnnealing(values, gui);
-		long start = System.currentTimeMillis();
-		RaupState s = sa.minimise();
-		long end = System.currentTimeMillis();
-		System.out.println("time,w,r0,rc,y0,t,rmse");
-		System.out.printf("%d,%f,%f,%f,%f,%f,%f\n", end - start, s.w, s.r0, s.rc, s.y0, s.t, s.distanceTo(values));
+
+		ExecutorService threadPool = Executors.newFixedThreadPool(2* Runtime.getRuntime().availableProcessors());
+
+
+		List<Future<String>> results = new ArrayList<>();
+
+		final boolean threadGui = gui;
+		for(int i = 0 ; i < numberOfRuns ; i++ ){
+			results.add(threadPool.submit(()->{
+			SimulatedAnnealing sa = new SimulatedAnnealing(values, threadGui);
+			RaupState s = sa.minimise();
+			return String.format("%f,%f,%f,%f,%f,%f\n", s.w, s.r0, s.rc, s.y0, s.t, s.distanceTo(values));
+			}));
+
+		}
+
+		System.out.println("w,r0,rc,y0,t,rmse");
+		for(Future<String> s : results){
+			try {
+				System.out.print(s.get());
+			} catch (InterruptedException | ExecutionException e) {
+				//Cry, but just keep going
+			}
+		}
+
+		threadPool.shutdown();
+
 	}
 
 	/**

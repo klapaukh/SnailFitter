@@ -19,7 +19,7 @@ public class RaupState {
 	}
 
 	public RaupState(Random r) {
-		this(r.nextDouble(), r.nextDouble(), r.nextDouble(), r.nextDouble() * 30 , r.nextDouble() * 5);
+		this(1, 0, 1, r.nextDouble() * 10 , r.nextDouble() * 5);
 	}
 
 	public RaupState moveRandom(Random r, double range) {
@@ -30,7 +30,7 @@ public class RaupState {
 		double newt = t;
 
 		double shift = (r.nextGaussian() * range);
-		int position = r.nextInt(5);
+		int position = r.nextInt(2);
 
 		switch (position) {
 		case 0:
