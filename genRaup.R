@@ -4,6 +4,7 @@ suppressMessages(library(dplyr,quietly=T))
 library(argparser,quietly=T)
 
 p = arg_parser("A R script to generate Raupian spirals") %>%
+      add_argument("--cyl", default=TRUE,   help="Use cylindrical coordinates") %>%
       add_argument("--filename",  default="raupCyl.csv", help="Output filename") %>%
       add_argument("--theta",  default=4*pi, help="How much curve to generate") %>%
       add_argument("--resolution",  default=0.01, help="Step size through theta") %>%
@@ -41,11 +42,12 @@ points = data.frame(theta = seq(0,args$theta,args$resolution)) %>%
          b = r*cos(theta),
          c = y)
 
-#points %>%
-#  select(a,b,c) %>%
-#  write.table(file="raupCart.csv",row.names = F, col.names = F, sep=" ")
-
+if(!args$cyl){
+points %>%
+  select(a,b,c) %>%
+  write.table(file=args$filename,row.names = F, col.names = F, sep=" ")
+} else {
 points %>%
   select(theta,r,y) %>%
-  write.table(file=args$filename,row.names = F, col.names = F, sep=" ")
-
+  write.table(file=args$filename,row.names = F, col.names = T, sep=" ")
+}
